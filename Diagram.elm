@@ -1679,7 +1679,10 @@ getSvg model =
                     svgText x y chars
                  )
     in
-    svg [height gheight, width gwidth]
+    svg [--xmlns "http://www.w3.org/2000/svg"
+         height gheight, width gwidth
+        ,Svg.Attributes.style ("font-size:"++toString fontSize++"px;font-family:monospace")
+         ]
         ([
          if gridOn then
             gridFill
@@ -1699,7 +1702,6 @@ svgText xloc yloc chars =
     Svg.text'
         [x (toString sx)
         ,y (toString sy)
-        ,Svg.Attributes.style ("font-size:"++toString fontSize++"px;font-family:monospace")
         ]
         [Svg.text chars
         ]
@@ -2075,10 +2077,14 @@ drawLine start end lineStroke feature =
             ]
             []
 
+colorText color =
+    let
+         {red,green,blue,alpha} = Color.toRgb color
+    in
+    "rgb("++(toString red)++","++(toString green)++","++(toString blue)++")"
+
 drawPathLine start end lineStroke feature =
     let 
-        {red,green,blue,alpha} = Color.toRgb color
-        colorText = "rgb("++(toString red)++","++(toString green)++","++(toString blue)++")"
         sx = start.x
         sy = start.y
         ex = end.x
@@ -2101,9 +2107,9 @@ drawPathLine start end lineStroke feature =
                 None ->
                     markerEnd ""
     in
-        path [d paths, stroke colorText
+        path [d paths, stroke <| colorText color
              ,strokeWidth <| toString lineWidth
-             ,fill "transparent"
+             ,fill "none"
              ,dashed
              ,arrow
              ]
@@ -2129,7 +2135,7 @@ drawArc start end radius sweep =
             ,toString ex, toString ey
             ] |> String.join " "
     in
-       path [d paths, stroke "black", strokeWidth <| toString lineWidth, fill "transparent"] []
+       path [d paths, stroke <| colorText color, strokeWidth <| toString lineWidth, fill "none"] []
 
 gridFill =
     [

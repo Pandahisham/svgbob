@@ -26,31 +26,8 @@
 ```
 
 ```svgbob
-
-+------+   +-----+   +-----+   +-----+
-|      |   |     |   |     |   |     |
-| Foo  +-->| Bar +---+ Baz |<--+ Moo |
-|      |   |     |   |     |   |     |
-+------+   +-----+   +--+--+   +-----+
-              ^         |
-              |         V
-.-------------+-----------------------.
-| Hello here and there and everywhere |
-'-------------------------------------'
-                        ____________
-   .--------------.     \           \
-  / a == b         \     \           \     __________
- (    &&            )     ) process   )    \         \
-  \ 'string' ne '' /     /           /     / process /
-   '--------------'     /___________/     /_________/
-
-    __________________
-    \                 \
-     \                 \
-      . another process .
-     /                 /
-    /_________________/
-
+   
+   
   User code  ^               ^ OS code
               \             /
                \        .--'
@@ -62,8 +39,6 @@
           v                  v 
        User code            OS code
 
-             .---.  .---. .---.  .---.    .---.  .---.
-    OS API   '---'  '---' '---'  '---'    '---'  '---'
                |      |     |      |        |      |
                v      v     |      v        |      v
              .------------. | .-----------. |  .-----.
@@ -80,27 +55,6 @@
              |                  HAL                  |
              '---------------------------------------'
              
-
-   ____[]
-  | ___ |
-  ||   ||  device
-  ||___||  loads
-  | ooo |----------------------------------------------------------.
-  | ooo |    |                          |                          |
-  | ooo |    |                          |                          |
-  '_____'    |                          |                          |
-             |                          |                          |
-             v                          v                          v
-   .-------------------.  .---------------------------.  .-------------------.
-   | Loadable module C |  |     Loadable module A     |  | Loadable module B |
-   '-------------------'  |---------------------------|  |   (instrumented)  |
-             |            |         .-----.           |  '-------------------'
-             '------------+-------->| A.o |           |             |
-                 calls    |         '-----'           |             |
-                          |    .------------------.   |             |
-                          |   / A.instrumented.o /<---+-------------'
-                          |  '------------------'     |    calls
-                          '---------------------------'   
 
 
                                         .--> Base::Class::Derived_A
@@ -127,12 +81,14 @@
                      /              '--- Last::One
        More::Stuff  V 
 
+ 
+
 ```
 
 ## Output
 
 
-<img src="https://raw.githubusercontent.com/ivanceras/svgbob/master/screenshot/out.svg"/>
+![](https://raw.githubusercontent.com/ivanceras/svgbob/master/screenshot/out.svg.png)
 
 ascii gotten from:
 http://www.ascii-code.com/ascii-art/cartoons/spongebob-squarepants.php
