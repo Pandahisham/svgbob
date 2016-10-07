@@ -15,6 +15,17 @@ import Char
 import Color
 import Array exposing (Array)
 
+fontSize = 14.0
+lineWidth = 1.0
+textWidth = 8.0
+textHeight = 16.0
+arcRadius = textWidth / 2
+color = Color.rgb 0 0 0
+optimizeSvg = True
+density = Compact
+gridOn = False
+
+
 type alias Model =
     {rows: Int
     ,columns: Int
@@ -46,16 +57,6 @@ init str =
     }
 
 type Density = Compact | Medium | Expanded
-
-fontSize = 14.0
-lineWidth = 1.0
-textWidth = 8.0
-textHeight = 16.0
-arcRadius = textWidth / 2
-color = Color.rgb 0 0 0
-optimizeSvg = True
-density = Compact
-gridOn = False
 
 measureX: Int -> Float
 measureX x =
