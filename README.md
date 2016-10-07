@@ -132,7 +132,7 @@
 ## Output
 
 
-![](https://cdn.rawgit.com/ivanceras/svgbob/master/screenshot/out.svg)
+<img src="https://cdn.rawgit.com/ivanceras/svgbob/master/screenshot/out.svg"/>
 
 ascii gotten from:
 http://www.ascii-code.com/ascii-art/cartoons/spongebob-squarepants.php
