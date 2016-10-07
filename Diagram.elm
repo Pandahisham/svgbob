@@ -21,8 +21,8 @@ textWidth = 8.0
 textHeight = 16.0
 arcRadius = textWidth / 2
 color = Color.rgb 0 0 0
-optimizeSvg = True
-density = Compact
+optimizeSvg = False
+density = Expanded
 gridOn = False
 
 
@@ -148,6 +148,7 @@ type Path
     | ArrowLine (Point, Point)
     | Arc (Point, Point, Float, Bool)
     | DashedLine (Point, Point)
+    | TextPath (Point, String)
 
 -- corresponding paths for each component
 componentPathList: Int -> Int -> List (Component, List Path)
@@ -346,6 +347,18 @@ componentPathList x y =
     ,[Line (Point mx ey, Point mx q3y)
      ,Arc (Point mx q3y, Point qx qy, arcRadius * 4, False)
      ,Line (Point qx qy, Point sx sy)
+     ]
+    )
+    ,
+    {--
+          |  
+          .
+           \   
+    --}
+    (Junction Mid [Top, BottomRight] Smooth
+    ,[Line (Point mx sy, Point mx qy)
+     ,Arc (Point mx qy, Point q3x q3y, arcRadius * 4, False)
+     ,Line (Point q3x q3y, Point ex ey)
      ]
     )
     ,
@@ -703,6 +716,8 @@ canConcat path1 path2 =
                     False
         ArrowLine (s, e) ->
             False 
+        TextPath (s, string) ->
+            False
 
 
 -- only lines can eat another line
@@ -768,8 +783,8 @@ tryReduce (x1, y1) (x2, y2) model =
                 case comp2 of
                     Just comp2 ->
                         let
-                            path1 = firstPathOnly x1 y1 comp1
-                            path2 = firstPathOnly x2 y2 comp2
+                            path1 = firstPathOnly x1 y1 comp1 model
+                            path2 = firstPathOnly x2 y2 comp2 model
                         in
                         case path1 of
                             Just path1 ->
@@ -801,9 +816,9 @@ reduce path1 path2 =
                     Nothing
 
 -- if has only 1 path return it
-firstPathOnly: Int -> Int -> Component -> Maybe Path
-firstPathOnly x y comp =
-    let paths = getComponentPaths x y comp
+firstPathOnly: Int -> Int -> Component -> Model -> Maybe Path
+firstPathOnly x y comp model =
+    let paths = getComponentPaths x y comp model
     in
     if List.length paths == 1 then
         List.head paths
@@ -994,43 +1009,43 @@ componentMatchList x y model =
             {--
                 |
             --}
-            (isChar char isVertical
+            (isChar char isVertical && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Piece Mid Vertical Solid
             )
             ,
             {--
                 -
             --}
-            (isChar char isHorizontal
+            (isChar char isHorizontal && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Piece Mid Horizontal Solid
             )
             ,
             {--
                 _
              --}
-            (isChar char isLowHorizontal
+            (isChar char isLowHorizontal && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Piece Low Horizontal Solid
             )
             ,
-            (isChar char isSlantLeft
+            (isChar char isSlantLeft && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Piece Mid SlantLeft Solid
             )
             ,
-            (isChar char isSlantRight
+            (isChar char isSlantRight && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Piece Mid SlantRight Solid
             )
             ,
             {--
              :
              --}
-            (isChar char isVerticalDashed
+            (isChar char isVerticalDashed && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Piece Mid Vertical Dashed
             )
             ,
             {--
              :
              --}
-            (isChar char isHorizontalDashed
+            (isChar char isHorizontalDashed && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Piece Mid Horizontal Dashed
             )
             ,
@@ -1039,7 +1054,7 @@ componentMatchList x y model =
                 |
             --}
             (isChar char isArrowUp
-             &&isNeighbor bottom isVertical
+             &&isNeighbor bottom isVertical && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Arrow Top
             )
             ,
@@ -1047,7 +1062,7 @@ componentMatchList x y model =
                 <-
             --}
             (isChar char isArrowLeft
-             &&isNeighbor right isHorizontal
+             &&isNeighbor right isHorizontal && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Arrow Left
             )
             ,
@@ -1055,7 +1070,7 @@ componentMatchList x y model =
                 ->
             --}
             (isChar char isArrowRight
-             &&isNeighbor left isHorizontal
+             &&isNeighbor left isHorizontal && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Arrow Right
             )
             ,
@@ -1064,7 +1079,7 @@ componentMatchList x y model =
                 V
             --}
             (isChar char isArrowDown
-             &&isNeighbor top isVertical
+             &&isNeighbor top isVertical && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Arrow Bottom
             )
             ,
@@ -1073,7 +1088,7 @@ componentMatchList x y model =
                  \
             --}
             (isChar char isArrowUp
-             &&isNeighbor bottomRight isSlantLeft
+             &&isNeighbor bottomRight isSlantLeft && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Arrow TopLeft
             )
             ,
@@ -1082,7 +1097,7 @@ componentMatchList x y model =
                v  
             --}
             (isChar char isArrowDown
-             &&isNeighbor topRight isSlantRight
+             &&isNeighbor topRight isSlantRight && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Arrow BottomLeft
             )
             ,
@@ -1091,7 +1106,7 @@ componentMatchList x y model =
                  v  
             --}
             (isChar char isArrowDown
-             &&isNeighbor topLeft isSlantLeft
+             &&isNeighbor topLeft isSlantLeft && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Arrow BottomRight
             )
             ,
@@ -1100,7 +1115,7 @@ componentMatchList x y model =
                / 
             --}
             (isChar char isArrowUp
-             &&isNeighbor bottomLeft isSlantRight
+             &&isNeighbor bottomLeft isSlantRight && not (isNeighbor left isAlphaNumeric) && not (isNeighbor right isAlphaNumeric)
             ,Arrow TopRight
             )
             ,
@@ -1257,6 +1272,17 @@ componentMatchList x y model =
              && isNeighbor topRight isSlantRight
              && isNeighbor bottomRight isSlantLeft
             ,Junction Mid [TopRight, BottomRight] Smooth
+            )
+            ,
+            {--
+                  |  
+                  .
+                   \  
+            --}
+            (isChar char isRound
+             && isNeighbor top isVertical
+             && isNeighbor bottomRight isSlantLeft
+            ,Junction Mid [Top, BottomRight] Smooth
             )
             ,
             {--
@@ -1607,18 +1633,35 @@ componentMatchList x y model =
 
         ]
 
+isNotSpace: Char -> Bool
+isNotSpace char =
+    char /= ' '
+
 matchComponent: Int -> Int -> Model -> Maybe Component
 matchComponent x y model =
-    componentMatchList x y model
-        |> List.reverse
-        |> List.filterMap
-            (\(match, comp) ->
-               if match then
-                    Just comp
+    let char = get x y model
+        comp = 
+            componentMatchList x y model
+                |> List.reverse
+                |> List.filterMap
+                    (\(match, comp) ->
+                       if match then
+                            Just comp
+                       else
+                            Nothing
+                    )
+                 |> List.head
+    in
+        case comp of 
+            Just comp ->
+                Just comp
+            Nothing ->
+               if isChar char isNotSpace then
+                  let _ = Debug.log "Matching component to char" char
+                  in
+                  Just <| Text (Maybe.withDefault ' ' char)
                else
-                    Nothing
-            )
-         |> List.head
+                  Nothing
 
 
 
@@ -1673,11 +1716,13 @@ getSvg model =
                       (\path ->
                         svgPath path
                       )
+                      {--
         svgTexts = getTexts model
                 |> List.map
                  (\(x, y, chars) ->
                     svgText x y chars
                  )
+                 --}
     in
     svg [--xmlns "http://www.w3.org/2000/svg"
          height gheight, width gwidth
@@ -1690,7 +1735,7 @@ getSvg model =
            [] 
         ,[defs [] [arrowMarker]]
         ,svgPaths
-        ,svgTexts
+        --,svgTexts
         ] |> List.concat
         )
         
@@ -1698,6 +1743,18 @@ svgText: Int -> Int -> String -> Svg a
 svgText xloc yloc chars =
     let sx = measureX xloc - textWidth / 4
         sy = measureY yloc + textHeight * 3 / 4
+    in
+    Svg.text'
+        [x (toString sx)
+        ,y (toString sy)
+        ]
+        [Svg.text chars
+        ]
+
+drawText: Point -> String -> Svg a
+drawText point chars =
+    let sx = point.x
+        sy = point.y
     in
     Svg.text'
         [x (toString sx)
@@ -1830,7 +1887,7 @@ reduceTo: Path -> (Int, Int) -> Model -> Maybe Path
 reduceTo path (x, y) model =
     case matchComponent x y model of
         Just comp ->
-            case firstPathOnly x y comp of
+            case firstPathOnly x y comp model of
                 Just firstPath ->
                     reduce path firstPath
                 Nothing ->
@@ -1881,7 +1938,7 @@ getOptimizedPath x y model =
             if isEdible x y model then
                 []
             else
-                case firstPathOnly x y center of
+                case firstPathOnly x y center model of
                     Just firstPath ->
                         case traceEatEdiblePaths firstPath (x, y) model of
                             Just path ->
@@ -1889,7 +1946,7 @@ getOptimizedPath x y model =
                             Nothing ->
                                 []
                     Nothing ->
-                         getComponentPaths x y center
+                         getComponentPaths x y center model
         Nothing ->
             []
 
@@ -1900,6 +1957,7 @@ startEnd path =
         Arc (s, e, r, sw) -> (s, e)
         ArrowLine se -> se
         DashedLine se -> se
+        TextPath (s,string) -> (s,s)
 
 -- merge the paths into 1 path definition
 toPathDefs: List Path -> (String, List Path)
@@ -1924,6 +1982,8 @@ toPathDefs paths =
                             ArrowLine _ ->
                                 [next]
                             DashedLine (s,e) ->
+                                [next]
+                            TextPath (s, string)  ->
                                 [next]
                             _ ->
                                 []
@@ -1996,23 +2056,36 @@ componentPaths x y model =
                     if optimizeSvg then
                         getOptimizedPath x y model
                     else
-                        getComponentPaths x y component
+                        getComponentPaths x y component model
              in
                 paths
         Nothing ->
            [] 
 
-getComponentPaths: Int -> Int -> Component -> List Path
-getComponentPaths x y component =
-    List.filterMap(
-        \ (comp, path) ->
-            if component == comp then
-                Just path
-            else
-                Nothing
-    ) ( componentPathList x y)
-       |> List.head
-       |> Maybe.withDefault [] 
+getComponentPaths: Int -> Int -> Component -> Model -> List Path
+getComponentPaths x y component model =
+    let char = get x y model
+        path =
+            List.filterMap(
+                \ (comp, path) ->
+                    if component == comp then
+                        Just path
+                    else
+                        Nothing
+            ) ( componentPathList x y)
+               |> List.head
+    in
+        case path of
+            Just path ->
+                path
+            Nothing ->
+               if isChar char isNotSpace then
+                  let _ = Debug.log "Matching component to char" char
+                  in
+                  [TextPath ((Point (measureX x + textWidth / 4) (measureY y + textHeight * 3 / 4)), String.fromChar (Maybe.withDefault ' ' char))]
+               else
+                  []
+                
 
 type Feature 
     = Arrowed
@@ -2029,6 +2102,8 @@ svgPath path =
             drawArc s e r sweep
         DashedLine (s, e) ->
             drawPathLine s e Dashed None
+        TextPath (s, string) ->
+            drawText s string
 
 reversePath: Path -> Path
 reversePath path =
@@ -2041,6 +2116,8 @@ reversePath path =
             Arc (e, s, r, not sweep)
         DashedLine (s, e) ->
             DashedLine (e, s)
+        TextPath (s, string) ->
+            TextPath (s, string)
         
     
 
