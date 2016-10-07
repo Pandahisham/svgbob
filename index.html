@@ -1,0 +1,85 @@
+<html>
+<head>
+<title>Ascii to SVG</title>
+<script src="main.js"> </script>
+<link rel="stylesheet" href="lib/codemirror.css">
+<script src="lib/codemirror.js"></script>
+<style>
+#editor
+{
+font-size:15.4px;
+}
+.CodeMirror
+{
+height:auto;
+}
+.CodeMirror-scroll
+{
+height:auto;
+}
+</style>
+</head>
+<body>
+<div style="display:flex">
+    <div id="editor" style="border:1px solid #ccc"></div>
+    <div id="elm"></div>
+</div>
+<script>
+var elm = document.getElementById("elm")
+var app = Elm.Main.embed(elm);
+app.ports.getAsciiText.subscribe(function(){
+    var asciiText = cm.getValue();
+    app.ports.receiveAsciiText.send(asciiText);
+});
+
+
+var editor = document.getElementById("editor")
+app.ports.setAsciiText.subscribe(function(asciiText){
+    cm.setValue(asciiText)
+});
+
+var cm = CodeMirror(editor,
+        {
+            mode: "text",
+            lineNumbers: true,
+            lineWrapping: false,
+            gutters: ["CodeMirror-linenumbers"],
+            extraKeys: {
+                       Tab: function(cm) {
+                            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                            cm.replaceSelection(spaces, "end", "+input");
+                        }
+                    }
+        }
+    );
+cm.setSize("500px", "auto");
+
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
+
+
+var sendAsciiText = debounce(function() {
+    window.requestAnimationFrame(function(){
+        var asciiText = cm.getValue();
+        app.ports.receiveAsciiText.send(asciiText);
+    });
+}, 500);
+
+cm.on("change",sendAsciiText);
+
+
+</script>
+</body>
+</html>

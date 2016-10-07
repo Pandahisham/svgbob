@@ -1,0 +1,9 @@
+elm-stuff
+node_modules
+build
+
+#swap files
+*~
+*.swp
+*.swo
+.DS_Store
