@@ -90,5 +90,4 @@
 
 ![](https://raw.githubusercontent.com/ivanceras/svgbob/master/screenshot/out.svg.png)
 
-ascii gotten from:
-http://www.ascii-code.com/ascii-art/cartoons/spongebob-squarepants.php
+ascii gotten [from](http://www.ascii-code.com/ascii-art/cartoons/spongebob-squarepants.php)
