@@ -1,5 +1,6 @@
 ## SvgBob converts ascii scribbles into an SVG
 
+```
       .--..--..--..--..--..--.
     .' \  (`._   (_)     _   \
   .'    |  '._)         (_)  |
@@ -22,6 +23,7 @@
              ||_.-.   ||_.-.
             (_.--__) (_.--__)
 
+```
 
 ```svgbob
 
@@ -130,7 +132,7 @@
 ## Output
 
 
-![](https://raw.githubusercontent.com/ivanceras/svgbob/master/screenshot/out.svg)
+![](https://cdn.rawgit.com/ivanceras/svgbob/master/screenshot/out.svg)
 
 ascii gotten from:
 http://www.ascii-code.com/ascii-art/cartoons/spongebob-squarepants.php
